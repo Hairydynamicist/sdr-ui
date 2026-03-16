@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SDR Control</title>
+  <style>
+	body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; max-width: 820px; margin: 2rem auto; padding: 0 1rem; }
+	.row { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+	select, button { padding: 0.6rem 0.8rem; font-size: 1rem; }
+	button { cursor: pointer; }
+	pre { background: #0b1020; color: #d7e1ff; padding: 1rem; border-radius: 10px; overflow: auto; min-height: 180px; }
+	.hint { color: #555; }
+  </style>
+</head>
+<body>
+  <h1>SDR Control</h1>
+  <p class="hint">Select an action and click <strong>Run</strong>. Output appears below.</p>
+
+  <div class="row">
+	<label for="action"><strong>Action:</strong></label>
+	<select id="action">
+  	<optgroup label="DAB (welle)">
+    	<option value="dab_leeds_11b">Tune: BBC Radio Leeds (DAB, Block 11B)</option>
+    	<option value="dab_5lse">Tune: BBC Radio 5 Live Sports Extra (DAB)</option>
+  	</optgroup>
+
+  	<optgroup label="FM">
+    	<option value="fm_leeds">Tune: BBC Radio Leeds (FM)</option>
+  	</optgroup>
+
+  	<optgroup label="SDR++">
+    	<option value="sdrpp_server_start">Start SDR++ server (headless)</option>
+    	<option value="sdrpp_server_stop">Stop SDR++ server</option>
+    	<option value="sdrpp_server_status">Status SDR++ server</option>
+    	<option value="sdrpp_gui_help">Show command to open SDR++ GUI</option>
+  	</optgroup>
+
+  	<optgroup label="Utility">
+    	<option value="stop_all_sdr">STOP ALL SDR USERS</option>
+  	</optgroup>
+	</select>
+
+	<button id="runBtn" onclick="runAction()">Run</button>
+  </div>
+
+  <h2>Output</h2>
+  <pre id="output">Ready.</pre>
+
+  <script>
+	async function runAction() {
+  	const action = document.getElementById("action").value;
+  	const btn = document.getElementById("runBtn");
+  	const out = document.getElementById("output");
+
+  	if (action === "stop_all_sdr") {
+    	const ok = confirm("This will stop all SDR services. Continue?");
+    	if (!ok) return;
+  	}
+
+  	btn.disabled = true;
+  	out.textContent = `Running: ${action} ...`;
+
+  	try {
+    	const resp = await fetch("/run", {
+      	method: "POST",
+      	headers: { "Content-Type": "application/json" },
+      	body: JSON.stringify({ action })
+    	});
+
+    	const text = await resp.text();
+    	out.textContent = text;
+  	} catch (err) {
+    	out.textContent = `ERROR: ${err}`;
+  	} finally {
+    	btn.disabled = false;
+  	}
+	}
+  </script>
+</body>
+</html>
