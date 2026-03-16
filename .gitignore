@@ -20,3 +20,13 @@ Thumbs.db
 # Logs
 *.log
 EOF
+
+# Never commit keys/secrets
+github-sdr-key
+github-sdr-key.pub
+
+# Common private key patterns
+id_ed25519*
+id_rsa*
+*.pem
+*.key
